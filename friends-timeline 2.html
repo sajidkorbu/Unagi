@@ -1,0 +1,1950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Friends Universe Timeline</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .filter-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            font-weight: 500;
+            margin: 5px;
+            display: inline-block;
+        }
+        
+        .filter-btn.active {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .rachel { background: #ff6b6b; color: white; }
+        .monica { background: #4ecdc4; color: white; }
+        .phoebe { background: #ffe66d; color: #333; }
+        .ross { background: #a8e6cf; color: #333; }
+        .chandler { background: #ff8b94; color: white; }
+        .joey { background: #b4a7d6; color: white; }
+        
+        .timeline-container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px 30px 30px 150px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: auto;
+            max-height: 700px;
+            height: 700px;
+        }
+        
+        .timeline {
+            position: relative;
+            min-height: 1200px;
+            padding: 40px 20px 40px 140px;
+            width: 2000px;
+            background-image: 
+                repeating-linear-gradient(90deg, transparent, transparent 189px, rgba(0,0,0,0.03) 189px, rgba(0,0,0,0.03) 190px),
+                repeating-linear-gradient(0deg, transparent, transparent 249px, rgba(0,0,0,0.03) 249px, rgba(0,0,0,0.03) 250px);
+            background-position: 120px 150px;
+        }
+        
+        .scroll-indicator {
+            position: absolute;
+            background: rgba(0,0,0,0.1);
+            padding: 10px;
+            border-radius: 5px;
+            animation: pulse 2s infinite;
+            z-index: 100;
+            font-size: 20px;
+            color: #666;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+        
+        .season-markers {
+            position: relative;
+            height: 40px;
+            margin-bottom: 40px;
+            margin-left: 120px;
+        }
+        
+        .season-marker {
+            text-align: center;
+            font-weight: bold;
+            color: #666;
+            position: relative;
+        }
+        
+        .season-marker::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 15px;
+            background: #ddd;
+        }
+        
+        .timeline-line {
+            position: absolute;
+            top: 80px;
+            left: 140px;
+            width: 1840px;
+            height: 2px;
+            background: #ddd;
+            margin-left: 120px;
+        }
+        
+        .event {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 200px;
+            max-width: 250px;
+            z-index: 10;
+        }
+        
+        .event:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 6px 25px rgba(0,0,0,0.2);
+            z-index: 100;
+            background: rgba(255, 255, 255, 1);
+        }
+        
+        .event-meta {
+            position: absolute;
+            top: -30px;
+            left: 0;
+            background: #333;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        
+        .event:hover .event-meta {
+            opacity: 1;
+        }
+        
+        .event-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .event-description {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        
+        .event-characters {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        
+        .character-tag {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        
+        .connection-line {
+            position: absolute;
+            background: rgba(0,0,0,0.1);
+            height: 2px;
+            transform-origin: left center;
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        .timeline-container::-webkit-scrollbar {
+            width: 12px;
+            height: 12px;
+        }
+        
+        .timeline-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .timeline-container::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        
+        .timeline-container::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        .timeline-container::-webkit-scrollbar-corner {
+            background: #f1f1f1;
+        }
+        
+        .stats-panel {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .stats-panel h2 {
+            text-align: center;
+            color: #4ecdc4;
+            margin-bottom: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            text-align: center;
+            padding: 20px 15px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            transition: all 0.3s;
+            cursor: default;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .stat-card:hover .stat-number {
+            animation: bounce 0.5s ease-in-out;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #4ecdc4;
+            margin-bottom: 8px;
+            transition: transform 0.3s;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+        
+        .legend {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .legend-title {
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .legend-items {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        
+        .event.filtered-out {
+            opacity: 0.3;
+            pointer-events: none;
+        }
+        
+        .connection-line.filtered-out {
+            opacity: 0.1;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .controls {
+                justify-content: center;
+            }
+            
+            .event {
+                min-width: 150px;
+                max-width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>F•R•I•E•N•D•S Universe</h1>
+        <p>The Complete Timeline of Life Events & Connections</p>
+    </div>
+    
+    <div class="container">
+        <div class="controls">
+            <div style="width: 100%; margin-bottom: 10px;">
+                <strong>Filter by Character:</strong> <span style="color: #666; font-size: 14px;">(Click to see individual storylines)</span>
+            </div>
+            <button class="filter-btn all active" onclick="filterEvents('all')">All Events</button>
+            <button class="filter-btn rachel" onclick="filterEvents('rachel')">Rachel</button>
+            <button class="filter-btn monica" onclick="filterEvents('monica')">Monica</button>
+            <button class="filter-btn phoebe" onclick="filterEvents('phoebe')">Phoebe</button>
+            <button class="filter-btn ross" onclick="filterEvents('ross')">Ross</button>
+            <button class="filter-btn chandler" onclick="filterEvents('chandler')">Chandler</button>
+            <button class="filter-btn joey" onclick="filterEvents('joey')">Joey</button>
+            <div id="filter-info" style="margin-left: 20px; display: inline-block; color: #4ecdc4; font-weight: 500;">Showing all 30 events</div>
+            <div style="width: 100%; margin-top: 10px; color: #666; font-size: 14px;">
+                💡 <strong>Tips:</strong> Hover on events to see episode info • Scroll right & down to explore • Lines show connected events • Filtered character is highlighted with border
+            </div>
+            <div style="text-align: center; margin-top: 20px; color: #999; font-size: 12px; font-style: italic;">
+                * Some statistics may have been influenced by Phoebe's psychic abilities and Joey's mathematical skills
+            </div>
+        </div>
+        
+        <div class="timeline-container">
+            <div class="season-markers" id="seasonMarkers"></div>
+            <div class="timeline-line"></div>
+            <div class="timeline" id="timeline"></div>
+            <div class="scroll-indicator" style="right: 20px; top: 50%;">→</div>
+            <div class="scroll-indicator" style="bottom: 20px; left: 50%; transform: translateX(-50%) rotate(90deg);">→</div>
+        </div>
+        
+        <div class="legend">
+            <div class="legend-title">Event Types</div>
+            <div class="legend-items">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ff6b6b;"></div>
+                    <span>Relationships</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #4ecdc4;"></div>
+                    <span>Career</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ffe66d;"></div>
+                    <span>Life Milestones</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #a8e6cf;"></div>
+                    <span>Friendships</span>
+                </div>
+            </div>
+            <div style="margin-top: 15px; font-size: 14px; color: #666;">
+                <strong>Navigation:</strong> The timeline is organized into horizontal lanes by event type, with seasons progressing left to right. 
+                Each character filter shows only events they were involved in.
+            </div>
+        </div>
+        
+        <div class="stats-panel">
+            <h2>The One with the Statistics</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">236</div>
+                    <div class="stat-label">Total Episodes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">3</div>
+                    <div class="stat-label">Ross's Divorces</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">∞</div>
+                    <div class="stat-label">Joey's Sandwiches</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">19</div>
+                    <div class="stat-label">"How You Doin'?" Success Rate (%)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">7</div>
+                    <div class="stat-label">Monica's Towel Categories</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">🦃</div>
+                    <div class="stat-label">Thanksgiving Disasters</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">OH!</div>
+                    <div class="stat-label">Janice's "MY GOD!"s</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">11</div>
+                    <div class="stat-label">Monica's Cleaning Zones</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">🎸</div>
+                    <div class="stat-label">Phoebe's Smelly Cat Performances</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">6</div>
+                    <div class="stat-label">Times They Switched Apartments</div>
+                </div>
+                <div class="stat-card" style="background: #ffe6e6;">
+                    <div class="stat-number">❤️</div>
+                    <div class="stat-label">Lobsters Who Found Each Other</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">?</div>
+                    <div class="stat-label">What Chandler's Job Actually Was</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">5</div>
+                    <div class="stat-label">Joey's Sisters We Met (out of 7)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">18</div>
+                    <div class="stat-label">Pages (FRONT AND BACK!)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">🛋️</div>
+                    <div class="stat-label">Hours on the Orange Couch</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">2</div>
+                    <div class="stat-label">Ugly Naked Guys</div>
+                </div>
+                <div class="stat-card" style="background: #e6f4ea;">
+                    <div class="stat-number">$7</div>
+                    <div class="stat-label">For a Cup of Lemonade (in 2030)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">👔</div>
+                    <div class="stat-label">Chandler's Sweater Vests</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">15</div>
+                    <div class="stat-label">Yemen, Road to Avoid Janice</div>
+                </div>
+                <div class="stat-card" style="background: #fff0f5;">
+                    <div class="stat-number">10</div>
+                    <div class="stat-label">Mississippi-Tanning Level</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">52</div>
+                    <div class="stat-label">Times Central Perk Couch Was Free</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">🎄</div>
+                    <div class="stat-label">Holiday Armadillos Spotted</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">P→G</div>
+                    <div class="stat-label">Phoebe's Name Changes</div>
+                </div>
+                <div class="stat-card" style="background: #f0f8ff;">
+                    <div class="stat-number">⚽</div>
+                    <div class="stat-label">Foosball Championships Won</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">1</div>
+                    <div class="stat-label">Successful Rachel Trifles</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">VD</div>
+                    <div class="stat-label">Viva Las Gaygas!</div>
+                </div>
+                <div class="stat-card" style="background: #f5f0ff;">
+                    <div class="stat-number">5→20</div>
+                    <div class="stat-label">Monica's Apt Number Mystery</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">🦆🐥</div>
+                    <div class="stat-label">Duck + Chick = Best Pets</div>
+                </div>
+                <div class="stat-card" style="background: #e6ffe6;">
+                    <div class="stat-number">0%</div>
+                    <div class="stat-label">Chance They Were on a Break</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">12</div>
+                    <div class="stat-label">Types of Potatoes Monica Knows</div>
+                </div>
+                <div class="stat-card" style="background: #ffe6f2;">
+                    <div class="stat-number">🥾</div>
+                    <div class="stat-label">Beef in the Trifle (Yum!)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">∞²</div>
+                    <div class="stat-label">Ken Adams' Charm Level</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">Could This BE More Statistics?</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="running-gags-panel" style="background: white; border-radius: 10px; padding: 20px; margin-top: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h2 style="text-align: center; color: #a8e6cf; margin-bottom: 20px;">The One with the Running Gags</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.5em; font-weight: bold; color: #ff6b6b;">WE WERE ON A BREAK!</div>
+                    <div style="color: #666; font-size: 14px; margin-top: 5px;">Referenced in 25+ episodes</div>
+                </div>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.5em; font-weight: bold; color: #4ecdc4;">The Gellar Cup</div>
+                    <div style="color: #666; font-size: 14px; margin-top: 5px;">Thanksgiving football tradition</div>
+                </div>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.5em; font-weight: bold; color: #ffe66d;">Unagi</div>
+                    <div style="color: #666; font-size: 14px; margin-top: 5px;">Ross's "state of total awareness"</div>
+                </div>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.5em; font-weight: bold; color: #b4a7d6;">Dr. Drake Ramoray</div>
+                    <div style="color: #666; font-size: 14px; margin-top: 5px;">Joey's soap opera alter ego</div>
+                </div>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.5em; font-weight: bold; color: #ff8b94;">Ms. Chanandler Bong</div>
+                    <div style="color: #666; font-size: 14px; margin-top: 5px;">Actually, it's MISS Chanandler Bong</div>
+                </div>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.5em; font-weight: bold; color: #a8e6cf;">Regina Phalange</div>
+                    <div style="color: #666; font-size: 14px; margin-top: 5px;">Phoebe's go-to fake name</div>
+                </div>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.5em; font-weight: bold; color: #ff6b6b;">The Routine</div>
+                    <div style="color: #666; font-size: 14px; margin-top: 5px;">Monica & Ross's dance from hell</div>
+                </div>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.5em; font-weight: bold; color: #4ecdc4;">SEVEN! SEVEN! SEVEN!</div>
+                    <div style="color: #666; font-size: 14px; margin-top: 5px;">Monica's... important number</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="quotes-panel" style="background: white; border-radius: 10px; padding: 20px; margin-top: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h2 style="text-align: center; color: #ff6b6b; margin-bottom: 20px;">The One with the Iconic Moments</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                <div style="background: #fff5f5; padding: 20px; border-radius: 8px; border-left: 4px solid #ff6b6b;">
+                    <strong>PIVOT! PIVOT! PIVOT!</strong><br>
+                    <span style="color: #666; font-size: 14px;">- Ross moving his couch (S5E16)</span>
+                </div>
+                <div style="background: #f5fffc; padding: 20px; border-radius: 8px; border-left: 4px solid #4ecdc4;">
+                    <strong>Could I BE wearing any more clothes?</strong><br>
+                    <span style="color: #666; font-size: 14px;">- Joey wearing all of Chandler's clothes (S3E2)</span>
+                </div>
+                <div style="background: #fffef5; padding: 20px; border-radius: 8px; border-left: 4px solid #ffe66d;">
+                    <strong>He's her lobster!</strong><br>
+                    <span style="color: #666; font-size: 14px;">- Phoebe about Ross & Rachel (S2E14)</span>
+                </div>
+                <div style="background: #f5fff5; padding: 20px; border-radius: 8px; border-left: 4px solid #a8e6cf;">
+                    <strong>Joey doesn't share food!</strong><br>
+                    <span style="color: #666; font-size: 14px;">- Joey's golden rule (S10E9)</span>
+                </div>
+                <div style="background: #fff5f7; padding: 20px; border-radius: 8px; border-left: 4px solid #ff8b94;">
+                    <strong>I'm not great at the advice. Can I interest you in a sarcastic comment?</strong><br>
+                    <span style="color: #666; font-size: 14px;">- Chandler's life philosophy (S8E5)</span>
+                </div>
+                <div style="background: #f8f5ff; padding: 20px; border-radius: 8px; border-left: 4px solid #b4a7d6;">
+                    <strong>It's not that common, it doesn't happen to every guy, and it IS a big deal!</strong><br>
+                    <span style="color: #666; font-size: 14px;">- Rachel to Ross (S5E14)</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="behind-scenes-panel" style="background: white; border-radius: 10px; padding: 20px; margin-top: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h2 style="text-align: center; color: #b4a7d6; margin-bottom: 20px;">The One with Behind-the-Scenes Secrets</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px;">
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #ff6b6b;">
+                    <strong>🎬 The Fountain Scene</strong><br>
+                    <span style="color: #666; font-size: 13px;">The opening credits fountain was filmed at 4am in Burbank, and the cast was shivering! The water was cold and they had to do multiple takes.</span>
+                </div>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #4ecdc4;">
+                    <strong>🎭 Marcel was Played by 2 Monkeys</strong><br>
+                    <span style="color: #666; font-size: 13px;">Katie and Monkey were both capuchin monkeys. One was male, one female. Katie was more aggressive and often bit David Schwimmer!</span>
+                </div>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #ffe66d;">
+                    <strong>☕ Central Perk Couch</strong><br>
+                    <span style="color: #666; font-size: 13px;">The iconic orange couch was found in the Warner Bros basement. It was reupholstered for the show and is now in the Smithsonian!</span>
+                </div>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #a8e6cf;">
+                    <strong>🏠 Monica's Apartment</strong><br>
+                    <span style="color: #666; font-size: 13px;">The apartment number changed from 5 to 20 because the writers realized they lived too high up for apartment 5. But they forgot Joey & Chandler's!</span>
+                </div>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #ff8b94;">
+                    <strong>🎵 Smelly Cat is Real</strong><br>
+                    <span style="color: #666; font-size: 13px;">Lisa Kudrow actually wrote and performed "Smelly Cat." She was in a folk duo called "The Unfortunates" before Friends!</span>
+                </div>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #b4a7d6;">
+                    <strong>💰 The Salary Evolution</strong><br>
+                    <span style="color: #666; font-size: 13px;">The cast went from $22,500 per episode in Season 1 to $1 million per episode in the final two seasons. They negotiated as a group!</span>
+                </div>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #ff6b6b;">
+                    <strong>🦃 Thanksgiving Turkey</strong><br>
+                    <span style="color: #666; font-size: 13px;">When Monica gets the turkey stuck on her head, Courteney Cox couldn't see anything. The other actors had to guide her around the set!</span>
+                </div>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #4ecdc4;">
+                    <strong>👶 Real Babies</strong><br>
+                    <span style="color: #666; font-size: 13px;">The twins playing Emma were actually played by quadruplets! And Ben was played by twins. Child labor laws require multiple babies for filming.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="character-quirks-panel" style="background: white; border-radius: 10px; padding: 20px; margin-top: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h2 style="text-align: center; color: #ff8b94; margin-bottom: 20px;">The One with Character Obsessions & Quirks</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                <div style="background: #ffe6e6; padding: 20px; border-radius: 8px;">
+                    <h3 style="color: #ff6b6b; margin-bottom: 15px;">🧹 Monica's Cleaning Rules</h3>
+                    <ul style="margin: 0; padding-left: 20px; color: #666; font-size: 14px; line-height: 1.6;">
+                        <li>11 different categories of towels</li>
+                        <li>Vacuum patterns must be consistent</li>
+                        <li>Cleaning supplies organized by color & frequency</li>
+                        <li>Coasters are MANDATORY (no exceptions!)</li>
+                        <li>Shoes removed at door (or death)</li>
+                        <li>Baking soda must be changed monthly</li>
+                    </ul>
+                </div>
+                <div style="background: #e6f4ea; padding: 20px; border-radius: 8px;">
+                    <h3 style="color: #a8e6cf; margin-bottom: 15px;">🦕 Ross's Dinosaur Obsessions</h3>
+                    <ul style="margin: 0; padding-left: 20px; color: #666; font-size: 14px; line-height: 1.6;">
+                        <li>Has a PhD in Paleontology from Columbia</li>
+                        <li>Favorite period: Mesozoic Era</li>
+                        <li>Dream job: Discovering new species</li>
+                        <li>Speaks about dinosaurs to anyone who'll listen</li>
+                        <li>His leather pants phase was... memorable</li>
+                        <li>Moist maker sandwich inventor</li>
+                    </ul>
+                </div>
+                <div style="background: #fff5e6; padding: 20px; border-radius: 8px;">
+                    <h3 style="color: #ffe66d; margin-bottom: 15px;">🎸 Phoebe's Musical Universe</h3>
+                    <ul style="margin: 0; padding-left: 20px; color: #666; font-size: 14px; line-height: 1.6;">
+                        <li>"Smelly Cat" - her magnum opus</li>
+                        <li>"Two of Them Kissed Last Night"</li>
+                        <li>"Terry's a Jerk" (about Gunther)</li>
+                        <li>Plays guitar outside Central Perk for tips</li>
+                        <li>Believes her music videos should feature animals</li>
+                        <li>Once dated a psychiatrist (but not for long)</li>
+                    </ul>
+                </div>
+                <div style="background: #f0f8ff; padding: 20px; border-radius: 8px;">
+                    <h3 style="color: #4ecdc4; margin-bottom: 15px;">🍕 Joey's Food Philosophy</h3>
+                    <ul style="margin: 0; padding-left: 20px; color: #666; font-size: 14px; line-height: 1.6;">
+                        <li>"Joey doesn't share food!" (cardinal rule)</li>
+                        <li>Can eat an entire turkey in one sitting</li>
+                        <li>Meatball subs are life</li>
+                        <li>Pizza is acceptable for every meal</li>
+                        <li>Invented the "Joey Special" (2 pizzas)</li>
+                        <li>Chandler's fridge = Joey's fridge</li>
+                    </ul>
+                </div>
+                <div style="background: #fff0f5; padding: 20px; border-radius: 8px;">
+                    <h3 style="color: #ff8b94; margin-bottom: 15px;">💼 Chandler's Defense Mechanisms</h3>
+                    <ul style="margin: 0; padding-left: 20px; color: #666; font-size: 14px; line-height: 1.6;">
+                        <li>Makes jokes when uncomfortable (always)</li>
+                        <li>"Could this BE any more...?" catchphrase</li>
+                        <li>Statistical analysis and data reconfiguration job</li>
+                        <li>Commitment issues (until Monica)</li>
+                        <li>Peculiar emphasis on random words</li>
+                        <li>Yemen: his escape destination of choice</li>
+                    </ul>
+                </div>
+                <div style="background: #f5f0ff; padding: 20px; border-radius: 8px;">
+                    <h3 style="color: #b4a7d6; margin-bottom: 15px;">🌟 Rachel's Fashion Evolution</h3>
+                    <ul style="margin: 0; padding-left: 20px; color: #666; font-size: 14px; line-height: 1.6;">
+                        <li>The "Rachel" haircut phenomenon</li>
+                        <li>From Bloomingdale's to Ralph Lauren</li>
+                        <li>Coffee shop waitress to fashion executive</li>
+                        <li>Trifle cooking disasters (beef + dessert = NO)</li>
+                        <li>Shopping addiction (but make it fashion)</li>
+                        <li>Paris: the ultimate fashion destination</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="episode-trivia-panel" style="background: white; border-radius: 10px; padding: 20px; margin-top: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h2 style="text-align: center; color: #4ecdc4; margin-bottom: 20px;">The One with Episode Trivia & Records</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border: 2px solid #ff6b6b;">
+                    <div style="font-size: 1.8em; font-weight: bold; color: #ff6b6b;">52.9M</div>
+                    <div style="color: #666; font-size: 13px;">Viewers watched the finale<br>(most-watched episode ever)</div>
+                </div>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border: 2px solid #4ecdc4;">
+                    <div style="font-size: 1.8em; font-weight: bold; color: #4ecdc4;">22m 30s</div>
+                    <div style="color: #666; font-size: 13px;">Average episode length<br>(without commercials)</div>
+                </div>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border: 2px solid #ffe66d;">
+                    <div style="font-size: 1.8em; font-weight: bold; color: #ffe66d;">96°</div>
+                    <div style="color: #666; font-size: 13px;">Temperature when filming<br>the Thanksgiving episodes (ouch!)</div>
+                </div>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border: 2px solid #a8e6cf;">
+                    <div style="font-size: 1.8em; font-weight: bold; color: #a8e6cf;">1,154</div>
+                    <div style="color: #666; font-size: 13px;">Times "like" was said<br>(mostly by Valley Girl Rachel)</div>
+                </div>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border: 2px solid #ff8b94;">
+                    <div style="font-size: 1.8em; font-weight: bold; color: #ff8b94;">83</div>
+                    <div style="color: #666; font-size: 13px;">Times Chandler says<br>"Could this BE any more...?"</div>
+                </div>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border: 2px solid #b4a7d6;">
+                    <div style="font-size: 1.8em; font-weight: bold; color: #b4a7d6;">147</div>
+                    <div style="color: #666; font-size: 13px;">Joey's "How you doin'?"<br>successful pickup attempts: 0</div>
+                </div>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border: 2px solid #ff6b6b;">
+                    <div style="font-size: 1.8em; font-weight: bold; color: #ff6b6b;">$4,000</div>
+                    <div style="color: #666; font-size: 13px;">Cost of Monica's apartment<br>per month (Grandmother's rent control!)</div>
+                </div>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border: 2px solid #4ecdc4;">
+                    <div style="font-size: 1.8em; font-weight: bold; color: #4ecdc4;">14</div>
+                    <div style="color: #666; font-size: 13px;">Different hairstyles<br>Rachel had throughout the show</div>
+                </div>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border: 2px solid #ffe66d;">
+                    <div style="font-size: 1.8em; font-weight: bold; color: #ffe66d;">62</div>
+                    <div style="color: #666; font-size: 13px;">Guest stars appeared<br>(including Brad Pitt, Tom Selleck)</div>
+                </div>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border: 2px solid #a8e6cf;">
+                    <div style="font-size: 1.8em; font-weight: bold; color: #a8e6cf;">236</div>
+                    <div style="color: #666; font-size: 13px;">Coffee cups consumed<br>on screen (estimated)</div>
+                </div>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border: 2px solid #ff8b94;">
+                    <div style="font-size: 1.8em; font-weight: bold; color: #ff8b94;">15</div>
+                    <div style="color: #666; font-size: 13px;">Emmy nominations<br>Won 6 total</div>
+                </div>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border: 2px solid #b4a7d6;">
+                    <div style="font-size: 1.8em; font-weight: bold; color: #b4a7d6;">10 Years</div>
+                    <div style="color: #666; font-size: 13px;">Show duration<br>September 1994 - May 2004</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="relationships-stats-panel" style="background: white; border-radius: 10px; padding: 20px; margin-top: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h2 style="text-align: center; color: #ff6b6b; margin-bottom: 20px;">The One with Relationship Mathematics</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                <div style="background: #fff5f5; padding: 20px; border-radius: 8px; border-left: 4px solid #ff6b6b;">
+                    <h3 style="color: #ff6b6b; margin-bottom: 15px;">💔 Ross's Love Life Disasters</h3>
+                    <div style="color: #666; font-size: 14px; line-height: 1.6;">
+                        <strong>3 Divorces:</strong> Carol, Emily, Rachel<br>
+                        <strong>18 Relationships:</strong> Including Professor Stevens<br>
+                        <strong>2 Lesbian Ex-wives:</strong> Carol (Ben's mom)<br>
+                        <strong>1 British Disaster:</strong> Emily (wrong name)<br>
+                        <strong>∞ "We Were on a Break" Arguments</strong><br>
+                        <strong>Success Rate:</strong> 16.7% (1 out of 6 friends)
+                    </div>
+                </div>
+                <div style="background: #f5fff5; padding: 20px; border-radius: 8px; border-left: 4px solid #a8e6cf;">
+                    <h3 style="color: #a8e6cf; margin-bottom: 15px;">💍 Monica & Chandler's Timeline</h3>
+                    <div style="color: #666; font-size: 14px; line-height: 1.6;">
+                        <strong>7 Years:</strong> From friends to lovers<br>
+                        <strong>2 Years:</strong> Secret relationship period<br>
+                        <strong>1 Year:</strong> Engagement duration<br>
+                        <strong>18 Months:</strong> Trying to conceive<br>
+                        <strong>2 Babies:</strong> Jack & Erica (adopted)<br>
+                        <strong>Success Rate:</strong> 100% (lobsters mate for life!)
+                    </div>
+                </div>
+                <div style="background: #f8f5ff; padding: 20px; border-radius: 8px; border-left: 4px solid #b4a7d6;">
+                    <h3 style="color: #b4a7d6; margin-bottom: 15px;">🍕 Joey's Dating Statistics</h3>
+                    <div style="color: #666; font-size: 14px; line-height: 1.6;">
+                        <strong>21 Girlfriends:</strong> Throughout the series<br>
+                        <strong>147 "How You Doin'?":</strong> Said on screen<br>
+                        <strong>0% Success Rate:</strong> With that pickup line<br>
+                        <strong>1 Serious Relationship:</strong> With Alex (S9)<br>
+                        <strong>∞ Sandwiches:</strong> Chosen over women<br>
+                        <strong>Food > Love:</strong> Always and forever
+                    </div>
+                </div>
+                <div style="background: #fffef5; padding: 20px; border-radius: 8px; border-left: 4px solid #ffe66d;">
+                    <h3 style="color: #ffe66d; margin-bottom: 15px;">🎭 Phoebe's Unconventional Love</h3>
+                    <div style="color: #666; font-size: 14px; line-height: 1.6;">
+                        <strong>3 Serious Relationships:</strong> David, Gary, Mike<br>
+                        <strong>1 Scientist:</strong> David (moved to Minsk)<br>
+                        <strong>1 Cop:</strong> Gary (shot a bird)<br>
+                        <strong>1 Soulmate:</strong> Mike Hannigan<br>
+                        <strong>0 Regrets:</strong> About choosing Mike<br>
+                        <strong>∞ Songs:</strong> Written about her relationships
+                    </div>
+                </div>
+                <div style="background: #fff0f5; padding: 20px; border-radius: 8px; border-left: 4px solid #ff8b94;">
+                    <h3 style="color: #ff8b94; margin-bottom: 15px;">💄 Rachel's Fashion & Romance</h3>
+                    <div style="color: #666; font-size: 14px; line-height: 1.6;">
+                        <strong>9 Boyfriends:</strong> Including Ross (twice)<br>
+                        <strong>2 Bosses:</strong> She dated (Joshua, Tag)<br>
+                        <strong>1 Assistant:</strong> Tag (younger guy phase)<br>
+                        <strong>1 Baby Daddy:</strong> Ross (Emma's father)<br>
+                        <strong>∞ Shopping Trips:</strong> Therapy method<br>
+                        <strong>True Love:</strong> Ross (after 10 years!)
+                    </div>
+                </div>
+                <div style="background: #f5fffc; padding: 20px; border-radius: 8px; border-left: 4px solid #4ecdc4;">
+                    <h3 style="color: #4ecdc4; margin-bottom: 15px;">🛏️ The Gang's Romantic Intersections</h3>
+                    <div style="color: #666; font-size: 14px; line-height: 1.6;">
+                        <strong>Ross ↔ Rachel:</strong> 3 separate attempts<br>
+                        <strong>Monica ↔ Chandler:</strong> Best friends to marriage<br>
+                        <strong>Joey ↔ Rachel:</strong> Brief awkward phase<br>
+                        <strong>Phoebe ↔ Joey:</strong> Massage buddies only<br>
+                        <strong>6 Friends:</strong> 15 possible combinations<br>
+                        <strong>Success Rate:</strong> 33.3% (2 out of 6 possible)
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="final-trivia-panel" style="background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%); border-radius: 10px; padding: 25px; margin-top: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); color: white;">
+            <h2 style="text-align: center; margin-bottom: 20px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">The One with the Ultimate Friends Knowledge</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 8px; backdrop-filter: blur(10px);">
+                    <strong style="display: block; margin-bottom: 8px;">🏆 Gunther's Secret</strong>
+                    <span style="font-size: 13px; opacity: 0.9;">James Michael Tyler (Gunther) was cast because he was the only extra who could operate the espresso machine!</span>
+                </div>
+                <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 8px; backdrop-filter: blur(10px);">
+                    <strong style="display: block; margin-bottom: 8px;">🎬 The Blackout Episode</strong>
+                    <span style="font-size: 13px; opacity: 0.9;">Based on the real 1994 NYC blackout. The writers experienced it and thought it would be perfect for TV!</span>
+                </div>
+                <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 8px; backdrop-filter: blur(10px);">
+                    <strong style="display: block; margin-bottom: 8px;">💰 Merchandise Empire</strong>
+                    <span style="font-size: 13px; opacity: 0.9;">Friends merchandise has earned over $1 billion since the show ended in 2004!</span>
+                </div>
+                <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 8px; backdrop-filter: blur(10px);">
+                    <strong style="display: block; margin-bottom: 8px;">🌍 Global Phenomenon</strong>
+                    <span style="font-size: 13px; opacity: 0.9;">Friends has been translated into 37 languages and airs in over 220 countries worldwide!</span>
+                </div>
+                <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 8px; backdrop-filter: blur(10px);">
+                    <strong style="display: block; margin-bottom: 8px;">📱 Streaming Success</strong>
+                    <span style="font-size: 13px; opacity: 0.9;">Netflix paid $100 million for Friends streaming rights. HBO Max later paid $425 million!</span>
+                </div>
+                <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 8px; backdrop-filter: blur(10px);">
+                    <strong style="display: block; margin-bottom: 8px;">🎭 The Reunion Special</strong>
+                    <span style="font-size: 13px; opacity: 0.9;">The 2021 reunion special was watched by 29% of all HBO Max subscribers on its premiere day!</span>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 25px; font-style: italic; opacity: 0.9;">
+                "I'll be there for you, 'cause you're there for me too!" 🎵<br>
+                <small>(The Rembrandts song became a #1 hit because of Friends!)</small>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Major events database
+        const events = [
+            // Season 1
+            {
+                id: 1,
+                season: 1,
+                episode: 1,
+                title: "Rachel Runs from Wedding",
+                description: "Rachel leaves Barry at the altar and reunites with Monica",
+                characters: ["rachel", "monica"],
+                type: "life",
+                connections: [2, 3]
+            },
+            {
+                id: 2,
+                season: 1,
+                episode: 1,
+                title: "The Gang Forms",
+                description: "Six friends begin their journey in Central Perk",
+                characters: ["rachel", "monica", "phoebe", "ross", "chandler", "joey"],
+                type: "friendship",
+                connections: []
+            },
+            {
+                id: 3,
+                season: 1,
+                episode: 2,
+                title: "Ross's Crush Revealed",
+                description: "We learn Ross has been in love with Rachel since high school",
+                characters: ["ross", "rachel"],
+                type: "relationship",
+                connections: [1, 15]
+            },
+            {
+                id: 4,
+                season: 1,
+                episode: 10,
+                title: "Marcel Arrives",
+                description: "Ross gets a monkey named Marcel",
+                characters: ["ross"],
+                type: "life",
+                connections: []
+            },
+            
+            // Season 2
+            {
+                id: 5,
+                season: 2,
+                episode: 1,
+                title: "Ross & Rachel's First Kiss",
+                description: "At Central Perk, Ross and Rachel finally kiss",
+                characters: ["ross", "rachel"],
+                type: "relationship",
+                connections: [3, 8]
+            },
+            {
+                id: 6,
+                season: 2,
+                episode: 13,
+                title: "Joey Moves Out",
+                description: "Joey gets his own apartment after soap opera success",
+                characters: ["joey", "chandler"],
+                type: "life",
+                connections: [10]
+            },
+            {
+                id: 7,
+                season: 2,
+                episode: 14,
+                title: "Ross & Rachel Date",
+                description: "Their first official date at the planetarium",
+                characters: ["ross", "rachel"],
+                type: "relationship",
+                connections: [5, 8]
+            },
+            
+            // Season 3
+            {
+                id: 8,
+                season: 3,
+                episode: 15,
+                title: "We Were on a Break!",
+                description: "Ross and Rachel break up, leading to the infamous debate",
+                characters: ["ross", "rachel"],
+                type: "relationship",
+                connections: [5, 7, 15, 30]
+            },
+            {
+                id: 9,
+                season: 3,
+                episode: 6,
+                title: "Chandler & Janice Reunite",
+                description: "OH. MY. GOD! Janice returns",
+                characters: ["chandler"],
+                type: "relationship",
+                connections: []
+            },
+            
+            // Season 4
+            {
+                id: 10,
+                season: 4,
+                episode: 19,
+                title: "Joey Moves Back",
+                description: "Joey loses money and moves back with Chandler",
+                characters: ["joey", "chandler"],
+                type: "friendship",
+                connections: [6, 11]
+            },
+            {
+                id: 11,
+                season: 4,
+                episode: 24,
+                title: "Ross's London Wedding",
+                description: "Ross marries Emily, but says Rachel's name",
+                characters: ["ross", "rachel"],
+                type: "life",
+                connections: [8, 12]
+            },
+            {
+                id: 12,
+                season: 4,
+                episode: 24,
+                title: "Monica & Chandler Hook Up",
+                description: "In London, Monica and Chandler secretly get together",
+                characters: ["monica", "chandler"],
+                type: "relationship",
+                connections: [13, 14, 20]
+            },
+            
+            // Season 5
+            {
+                id: 13,
+                season: 5,
+                episode: 14,
+                title: "Everyone Finds Out",
+                description: "The gang discovers Monica and Chandler's relationship",
+                characters: ["monica", "chandler", "phoebe", "rachel", "ross", "joey"],
+                type: "relationship",
+                connections: [12]
+            },
+            {
+                id: 14,
+                season: 5,
+                episode: 15,
+                title: "I Love You",
+                description: "Monica and Chandler say 'I love you' for the first time",
+                characters: ["monica", "chandler"],
+                type: "relationship",
+                connections: [12, 20]
+            },
+            
+            // Season 6
+            {
+                id: 15,
+                season: 6,
+                episode: 18,
+                title: "Ross & Rachel in Vegas",
+                description: "Drunk Ross and Rachel get married in Vegas",
+                characters: ["ross", "rachel"],
+                type: "relationship",
+                connections: [8, 11, 25]
+            },
+            {
+                id: 16,
+                season: 6,
+                episode: 25,
+                title: "Chandler Proposes",
+                description: "Chandler proposes to Monica in their candlelit apartment",
+                characters: ["monica", "chandler"],
+                type: "life",
+                connections: [14, 20]
+            },
+            
+            // Season 7
+            {
+                id: 17,
+                season: 7,
+                episode: 1,
+                title: "Monica's Engagement",
+                description: "Monica says yes to Chandler's proposal",
+                characters: ["monica", "chandler"],
+                type: "life",
+                connections: [16, 20]
+            },
+            {
+                id: 18,
+                season: 7,
+                episode: 17,
+                title: "Joey's Big Break",
+                description: "Joey gets cast in a World War I movie",
+                characters: ["joey"],
+                type: "career",
+                connections: []
+            },
+            
+            // Season 7-8
+            {
+                id: 20,
+                season: 7,
+                episode: 24,
+                title: "Monica & Chandler's Wedding",
+                description: "The couple gets married as Rachel reveals she's pregnant",
+                characters: ["monica", "chandler", "rachel"],
+                type: "life",
+                connections: [16, 17, 21]
+            },
+            {
+                id: 21,
+                season: 8,
+                episode: 1,
+                title: "Rachel's Pregnancy Revealed",
+                description: "We learn Ross is the father of Rachel's baby",
+                characters: ["rachel", "ross"],
+                type: "life",
+                connections: [20, 25]
+            },
+            
+            // Season 8-9
+            {
+                id: 22,
+                season: 8,
+                episode: 13,
+                title: "Joey Falls for Rachel",
+                description: "Joey develops feelings for pregnant Rachel",
+                characters: ["joey", "rachel"],
+                type: "relationship",
+                connections: [24]
+            },
+            {
+                id: 23,
+                season: 8,
+                episode: 24,
+                title: "Emma is Born",
+                description: "Rachel gives birth to Emma",
+                characters: ["rachel", "ross"],
+                type: "life",
+                connections: [21, 25]
+            },
+            {
+                id: 24,
+                season: 9,
+                episode: 1,
+                title: "Joey & Rachel Date",
+                description: "Joey and Rachel briefly try dating",
+                characters: ["joey", "rachel"],
+                type: "relationship",
+                connections: [22]
+            },
+            
+            // Season 9-10
+            {
+                id: 25,
+                season: 9,
+                episode: 16,
+                title: "Ross & Rachel Co-parent",
+                description: "Ross and Rachel navigate raising Emma together",
+                characters: ["ross", "rachel"],
+                type: "life",
+                connections: [23, 30]
+            },
+            {
+                id: 26,
+                season: 9,
+                episode: 22,
+                title: "Monica & Chandler's Adoption Journey",
+                description: "The couple decides to adopt after fertility struggles",
+                characters: ["monica", "chandler"],
+                type: "life",
+                connections: [28]
+            },
+            {
+                id: 27,
+                season: 10,
+                episode: 9,
+                title: "Rachel's Paris Job",
+                description: "Rachel gets a dream job offer in Paris",
+                characters: ["rachel"],
+                type: "career",
+                connections: [29, 30]
+            },
+            {
+                id: 28,
+                season: 10,
+                episode: 17,
+                title: "Monica & Chandler Adopt Twins",
+                description: "Jack and Erica are born",
+                characters: ["monica", "chandler"],
+                type: "life",
+                connections: [26, 29]
+            },
+            {
+                id: 29,
+                season: 10,
+                episode: 17,
+                title: "Moving to Suburbs",
+                description: "Monica and Chandler buy a house in Westchester",
+                characters: ["monica", "chandler"],
+                type: "life",
+                connections: [28]
+            },
+            {
+                id: 30,
+                season: 10,
+                episode: 18,
+                title: "Ross & Rachel Reunite",
+                description: "I got off the plane! They finally get back together",
+                characters: ["ross", "rachel"],
+                type: "relationship",
+                connections: [8, 25, 27]
+            },
+            
+            // Additional Season 1 events
+            {
+                id: 31,
+                season: 1,
+                episode: 7,
+                title: "The Blackout",
+                description: "Power goes out across NYC, chaos and romance ensue",
+                characters: ["rachel", "monica", "phoebe", "ross", "chandler", "joey"],
+                type: "friendship",
+                connections: [2]
+            },
+            {
+                id: 32,
+                season: 1,
+                episode: 19,
+                title: "The Monkey Gets Out",
+                description: "Marcel escapes and creates havoc in the building",
+                characters: ["ross", "monica", "rachel"],
+                type: "life",
+                connections: [4]
+            },
+            {
+                id: 33,
+                season: 1,
+                episode: 15,
+                title: "Monica's Fake Monica",
+                description: "Monica loses her credit card to a more exciting version of herself",
+                characters: ["monica", "rachel"],
+                type: "life",
+                connections: []
+            },
+            {
+                id: 34,
+                season: 1,
+                episode: 17,
+                title: "Rachel Learns Truth About Ross",
+                description: "Rachel discovers Ross's feelings at Central Perk",
+                characters: ["rachel", "ross"],
+                type: "relationship",
+                connections: [3, 5]
+            },
+            
+            // Additional Season 2 events
+            {
+                id: 35,
+                season: 2,
+                episode: 4,
+                title: "Phoebe Finds Her Father",
+                description: "Phoebe discovers her biological father but can't face him",
+                characters: ["phoebe"],
+                type: "life",
+                connections: []
+            },
+            {
+                id: 36,
+                season: 2,
+                episode: 7,
+                title: "Ross & Rachel... You Know",
+                description: "Ross and Rachel sleep together for the first time",
+                characters: ["ross", "rachel"],
+                type: "relationship",
+                connections: [5, 7]
+            },
+            {
+                id: 37,
+                season: 2,
+                episode: 9,
+                title: "Phoebe's Shocking Discovery",
+                description: "Phoebe learns her mother's friend is actually her mother",
+                characters: ["phoebe"],
+                type: "life",
+                connections: [35]
+            },
+            {
+                id: 38,
+                season: 2,
+                episode: 11,
+                title: "Ross & Rachel's First Fight",
+                description: "The 'pros and cons' list incident",
+                characters: ["ross", "rachel"],
+                type: "relationship",
+                connections: [36, 8]
+            },
+            
+            // Additional Season 3 events
+            {
+                id: 39,
+                season: 3,
+                episode: 1,
+                title: "Ross & Rachel Break Up",
+                description: "The aftermath of the pros and cons list",
+                characters: ["ross", "rachel"],
+                type: "relationship",
+                connections: [38, 8]
+            },
+            {
+                id: 40,
+                season: 3,
+                episode: 2,
+                title: "Joey Wears All of Chandler's Clothes",
+                description: "Could I BE wearing any more clothes?",
+                characters: ["joey", "chandler"],
+                type: "friendship",
+                connections: []
+            },
+            {
+                id: 41,
+                season: 3,
+                episode: 9,
+                title: "The Football Game",
+                description: "The first appearance of the Geller Cup",
+                characters: ["monica", "ross", "rachel", "chandler", "joey", "phoebe"],
+                type: "friendship",
+                connections: []
+            },
+            {
+                id: 42,
+                season: 6,
+                episode: 16,
+                title: "Ross Dates a Student",
+                description: "Ross starts dating Elizabeth, his much younger student",
+                characters: ["ross"],
+                type: "relationship",
+                connections: [8]
+            },
+            {
+                id: 43,
+                season: 3,
+                episode: 25,
+                title: "Ross Says the Wrong Name",
+                description: "Ross accidentally says Rachel's name at his wedding rehearsal",
+                characters: ["ross", "rachel"],
+                type: "relationship",
+                connections: [11, 42]
+            },
+            
+            // Additional Season 4 events
+            {
+                id: 44,
+                season: 4,
+                episode: 1,
+                title: "The Jellyfish Incident",
+                description: "Monica gets stung by a jellyfish, awkward moments ensue",
+                characters: ["monica", "chandler", "joey"],
+                type: "friendship",
+                connections: []
+            },
+            {
+                id: 45,
+                season: 4,
+                episode: 8,
+                title: "Chandler in a Box",
+                description: "Chandler's Thanksgiving punishment for kissing Joey's girlfriend",
+                characters: ["chandler", "joey"],
+                type: "friendship",
+                connections: [44]
+            },
+            {
+                id: 46,
+                season: 4,
+                episode: 12,
+                title: "The Embryos",
+                description: "Phoebe's embryo transfer and the apartment quiz",
+                characters: ["phoebe", "monica", "rachel", "ross", "chandler", "joey"],
+                type: "life",
+                connections: [37]
+            },
+            {
+                id: 47,
+                season: 4,
+                episode: 16,
+                title: "The Fake Party",
+                description: "Rachel throws a fake going-away party for Emily",
+                characters: ["rachel", "ross"],
+                type: "relationship",
+                connections: [43, 11]
+            },
+            
+            // Additional Season 5 events
+            {
+                id: 48,
+                season: 5,
+                episode: 2,
+                title: "Ross Can't Get His Leather Pants On",
+                description: "Ross's disastrous date with the leather pants incident",
+                characters: ["ross"],
+                type: "life",
+                connections: []
+            },
+            {
+                id: 49,
+                season: 6,
+                episode: 9,
+                title: "The Thanksgiving Trifle",
+                description: "Rachel makes a trifle with beef, peas, and onions",
+                characters: ["rachel", "monica", "ross", "chandler", "joey", "phoebe"],
+                type: "friendship",
+                connections: [41]
+            },
+            {
+                id: 50,
+                season: 5,
+                episode: 3,
+                title: "Phoebe Gives Birth to Triplets",
+                description: "Phoebe delivers her half-brother's babies",
+                characters: ["phoebe"],
+                type: "life",
+                connections: [46]
+            },
+            {
+                id: 51,
+                season: 5,
+                episode: 16,
+                title: "The Couch Moving Disaster",
+                description: "PIVOT! PIVOT! PIVOT!",
+                characters: ["ross", "rachel", "chandler"],
+                type: "friendship",
+                connections: []
+            },
+            
+            // Additional Season 6 events
+            {
+                id: 52,
+                season: 6,
+                episode: 2,
+                title: "Ross's Teeth Whitening Disaster",
+                description: "Ross's teeth glow in the dark after over-whitening",
+                characters: ["ross"],
+                type: "life",
+                connections: [48]
+            },
+            {
+                id: 53,
+                season: 6,
+                episode: 9,
+                title: "The One Where Ross Got High",
+                description: "Monica's parents learn the truth about the pot smoking",
+                characters: ["monica", "ross", "rachel"],
+                type: "life",
+                connections: [49]
+            },
+            {
+                id: 54,
+                season: 6,
+                episode: 15,
+                title: "Joey's Roommate Auditions",
+                description: "Joey tries to find a new roommate after Chandler moves out",
+                characters: ["joey", "chandler"],
+                type: "friendship",
+                connections: [6, 10]
+            },
+            {
+                id: 55,
+                season: 6,
+                episode: 24,
+                title: "Ross & Rachel's Vegas Wedding",
+                description: "The drunken wedding in Vegas chapel",
+                characters: ["ross", "rachel"],
+                type: "life",
+                connections: [15]
+            },
+            
+            // Additional Season 7 events
+            {
+                id: 56,
+                season: 7,
+                episode: 3,
+                title: "Rachel's Assistant Tag",
+                description: "Rachel hires Tag, her much younger assistant",
+                characters: ["rachel"],
+                type: "career",
+                connections: []
+            },
+            {
+                id: 57,
+                season: 7,
+                episode: 10,
+                title: "The Holiday Armadillo",
+                description: "Ross dresses as an armadillo for Ben's Hanukkah",
+                characters: ["ross", "monica", "chandler", "joey", "phoebe"],
+                type: "friendship",
+                connections: [53]
+            },
+            {
+                id: 58,
+                season: 7,
+                episode: 14,
+                title: "Monica's Secret Relationship",
+                description: "Monica and Chandler almost get caught by her parents",
+                characters: ["monica", "chandler"],
+                type: "relationship",
+                connections: [13, 16]
+            },
+            {
+                id: 59,
+                season: 7,
+                episode: 20,
+                title: "Rachel & Tag Break Up",
+                description: "Rachel ends things with Tag due to their age difference",
+                characters: ["rachel"],
+                type: "relationship",
+                connections: [56]
+            },
+            
+            // Additional Season 8 events
+            {
+                id: 60,
+                season: 8,
+                episode: 2,
+                title: "The Red Sweater Mystery",
+                description: "The gang tries to figure out who's the father of Rachel's baby",
+                characters: ["rachel", "ross", "monica", "chandler", "joey", "phoebe"],
+                type: "life",
+                connections: [21]
+            },
+            {
+                id: 61,
+                season: 8,
+                episode: 5,
+                title: "Rachel Tells Her Dad",
+                description: "Rachel's father learns about the pregnancy",
+                characters: ["rachel", "ross"],
+                type: "life",
+                connections: [60]
+            },
+            {
+                id: 62,
+                season: 8,
+                episode: 9,
+                title: "The Rumor About Rachel",
+                description: "Ross and Will's 'I Hate Rachel Green Club' is revealed",
+                characters: ["ross", "rachel", "monica"],
+                type: "friendship",
+                connections: [49, 53]
+            },
+            {
+                id: 63,
+                season: 8,
+                episode: 20,
+                title: "Rachel's Baby Shower",
+                description: "The gang throws Rachel a baby shower",
+                characters: ["rachel", "monica", "phoebe", "joey", "chandler", "ross"],
+                type: "friendship",
+                connections: [61]
+            },
+            
+            // Additional Season 9 events
+            {
+                id: 64,
+                season: 9,
+                episode: 6,
+                title: "The Male Nanny",
+                description: "Ross and Rachel hire a male nanny for Emma",
+                characters: ["ross", "rachel"],
+                type: "life",
+                connections: [23]
+            },
+            {
+                id: 65,
+                season: 9,
+                episode: 8,
+                title: "Rachel's First Thanksgiving as a Mom",
+                description: "Rachel navigates her first Thanksgiving with baby Emma",
+                characters: ["rachel", "ross", "monica", "chandler", "joey", "phoebe"],
+                type: "life",
+                connections: [62, 63]
+            },
+            {
+                id: 66,
+                season: 9,
+                episode: 11,
+                title: "Monica's Cleaning Lady",
+                description: "Monica's obsessive cleaning meets its match",
+                characters: ["monica"],
+                type: "life",
+                connections: []
+            },
+            {
+                id: 67,
+                season: 9,
+                episode: 20,
+                title: "Joey's Inappropriate Feelings",
+                description: "Joey finally tells Rachel about his feelings",
+                characters: ["joey", "rachel"],
+                type: "relationship",
+                connections: [22, 24]
+            },
+            
+            // Additional Season 10 events
+            {
+                id: 68,
+                season: 10,
+                episode: 2,
+                title: "Ross's Rage Issues",
+                description: "Ross goes to anger management after the sandwich incident",
+                characters: ["ross"],
+                type: "life",
+                connections: [48, 52]
+            },
+            {
+                id: 69,
+                season: 10,
+                episode: 4,
+                title: "Phoebe's Wedding Plans",
+                description: "Phoebe starts planning her wedding with Mike",
+                characters: ["phoebe"],
+                type: "relationship",
+                connections: []
+            },
+            {
+                id: 70,
+                season: 10,
+                episode: 8,
+                title: "The Late Thanksgiving",
+                description: "Monica locks everyone out for being late to Thanksgiving dinner",
+                characters: ["monica", "rachel", "ross", "chandler", "joey", "phoebe"],
+                type: "friendship",
+                connections: []
+            },
+            {
+                id: 71,
+                season: 10,
+                episode: 12,
+                title: "Phoebe & Mike's Wedding",
+                description: "Phoebe finally gets married in the snow",
+                characters: ["phoebe"],
+                type: "life",
+                connections: [69]
+            },
+            {
+                id: 72,
+                season: 10,
+                episode: 15,
+                title: "Rachel's Interview in Paris",
+                description: "Rachel interviews for her dream job at Louis Vuitton",
+                characters: ["rachel"],
+                type: "career",
+                connections: [27]
+            },
+            {
+                id: 73,
+                season: 10,
+                episode: 16,
+                title: "The One with the Fertility Test",
+                description: "Monica and Chandler learn about their fertility issues",
+                characters: ["monica", "chandler"],
+                type: "life",
+                connections: [26]
+            },
+            {
+                id: 74,
+                season: 10,
+                episode: 17,
+                title: "The Last Day in the Apartment",
+                description: "The gang says goodbye to Monica's apartment",
+                characters: ["monica", "rachel", "ross", "chandler", "joey", "phoebe"],
+                type: "friendship",
+                connections: [28, 29, 30]
+            }
+        ];
+        
+        let currentFilter = 'all';
+        
+        function initializeTimeline() {
+            createSeasonMarkers();
+            createLaneLabels();
+            renderEvents();
+            drawConnections();
+            
+            // Initialize filter info
+            const filterInfo = document.getElementById('filter-info');
+            if (filterInfo) {
+                filterInfo.textContent = `Showing all ${events.length} events`;
+            }
+        }
+        
+        function createLaneLabels() {
+            const timeline = document.getElementById('timeline');
+            const lanes = [
+                { name: 'Relationships', y: 150 },
+                { name: 'Career', y: 400 },
+                { name: 'Life Events', y: 650 },
+                { name: 'Friendships', y: 900 }
+            ];
+            
+            lanes.forEach((lane, index) => {
+                const label = document.createElement('div');
+                label.className = 'lane-label';
+                label.style.cssText = `position: absolute; left: 10px; top: ${lane.y}px; width: 100px; text-align: left; color: #666; font-weight: bold; font-size: 12px;`;
+                label.textContent = lane.name;
+                timeline.appendChild(label);
+            });
+        }
+        
+        function createSeasonMarkers() {
+            const seasonMarkersDiv = document.getElementById('seasonMarkers');
+            seasonMarkersDiv.style.width = '2000px';
+            seasonMarkersDiv.style.position = 'relative';
+            
+            for (let i = 1; i <= 10; i++) {
+                const marker = document.createElement('div');
+                marker.className = 'season-marker';
+                marker.textContent = `Season ${i}`;
+                marker.style.position = 'absolute';
+                marker.style.left = ((i - 1) * 190 + 95 + 120) + 'px';
+                marker.style.width = '100px';
+                seasonMarkersDiv.appendChild(marker);
+            }
+        }
+        
+        function getEventPosition(event) {
+            // Spread events across a wider timeline
+            const timelineWidth = 1900;
+            const seasonWidth = timelineWidth / 10;
+            const x = (event.season - 1) * seasonWidth + (event.episode / 25) * seasonWidth + 120;
+            
+            // Create lanes for different event types with much more spacing
+            const laneHeight = 250;
+            const lanes = {
+                'relationship': 0,
+                'career': 1,
+                'life': 2,
+                'friendship': 3
+            };
+            
+            // Add variation within lanes to prevent overlap
+            const laneOffset = (event.id % 4) * 60;
+            const y = 150 + (lanes[event.type] * laneHeight) + laneOffset;
+            
+            return { x: x + 'px', y: y + 'px' };
+        }
+        
+        function getEventTypeColor(type) {
+            const colors = {
+                'relationship': '#ff6b6b',
+                'career': '#4ecdc4',
+                'life': '#ffe66d',
+                'friendship': '#a8e6cf'
+            };
+            return colors[type] || '#ddd';
+        }
+        
+        function renderEvents() {
+            const timeline = document.getElementById('timeline');
+            // Clear only event elements and connection lines, preserve lane labels
+            document.querySelectorAll('.event').forEach(event => event.remove());
+            document.querySelectorAll('.connection-line').forEach(line => line.remove());
+            
+            let visibleEventIds = new Set();
+            
+            events.forEach(event => {
+                // Check if this event should be shown based on filter
+                let shouldShow = false;
+                
+                if (currentFilter === 'all') {
+                    shouldShow = true;
+                } else {
+                    // Show event if the filtered character is involved
+                    shouldShow = event.characters.includes(currentFilter);
+                }
+                
+                if (!shouldShow) return;
+                
+                visibleEventIds.add(event.id);
+                
+                const eventDiv = document.createElement('div');
+                eventDiv.className = 'event';
+                eventDiv.id = `event-${event.id}`;
+                eventDiv.style.borderLeft = `4px solid ${getEventTypeColor(event.type)}`;
+                
+                const position = getEventPosition(event);
+                eventDiv.style.left = position.x;
+                eventDiv.style.top = position.y;
+                
+                // Highlight the filtered character
+                const characterTags = event.characters.map(char => {
+                    const isHighlighted = currentFilter !== 'all' && char === currentFilter;
+                    return `<span class="character-tag ${char}" style="${isHighlighted ? 'border: 2px solid #333;' : ''}">${char.charAt(0).toUpperCase() + char.slice(1)}</span>`;
+                }).join('');
+                
+                eventDiv.innerHTML = `
+                    <div class="event-meta">Season ${event.season}, Episode ${event.episode}</div>
+                    <div class="event-title">${event.title}</div>
+                    <div class="event-description">${event.description}</div>
+                    <div class="event-characters">${characterTags}</div>
+                `;
+                
+                timeline.appendChild(eventDiv);
+            });
+            
+            // Store visible events for connection drawing
+            timeline.dataset.visibleEvents = JSON.stringify(Array.from(visibleEventIds));
+        }
+        
+        function drawConnections() {
+            // Clear existing connections
+            document.querySelectorAll('.connection-line').forEach(line => line.remove());
+            
+            const timeline = document.getElementById('timeline');
+            const visibleEventIds = new Set(JSON.parse(timeline.dataset.visibleEvents || '[]'));
+            
+            events.forEach(event => {
+                // Only process visible events
+                if (!visibleEventIds.has(event.id)) return;
+                
+                event.connections.forEach(targetId => {
+                    // Only draw connections to other visible events
+                    if (!visibleEventIds.has(targetId)) return;
+                    
+                    const targetEvent = events.find(e => e.id === targetId);
+                    if (!targetEvent) return;
+                    
+                    const sourceEl = document.getElementById(`event-${event.id}`);
+                    const targetEl = document.getElementById(`event-${targetId}`);
+                    
+                    if (sourceEl && targetEl) {
+                        const line = createConnectionLine(sourceEl, targetEl);
+                        timeline.appendChild(line);
+                    }
+                });
+            });
+        }
+        
+        function createConnectionLine(source, target) {
+            const line = document.createElement('div');
+            line.className = 'connection-line';
+            
+            const sourceRect = source.getBoundingClientRect();
+            const targetRect = target.getBoundingClientRect();
+            const timelineRect = document.getElementById('timeline').getBoundingClientRect();
+            
+            const x1 = sourceRect.left + sourceRect.width / 2 - timelineRect.left;
+            const y1 = sourceRect.top + sourceRect.height / 2 - timelineRect.top;
+            const x2 = targetRect.left + targetRect.width / 2 - timelineRect.left;
+            const y2 = targetRect.top + targetRect.height / 2 - timelineRect.top;
+            
+            const length = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+            const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+            
+            line.style.width = `${length}px`;
+            line.style.left = `${x1}px`;
+            line.style.top = `${y1}px`;
+            line.style.transform = `rotate(${angle}deg)`;
+            
+            return line;
+        }
+        
+        function filterEvents(character) {
+            currentFilter = character;
+            
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            const activeBtn = character === 'all' 
+                ? document.querySelector('.filter-btn.all') 
+                : document.querySelector(`.filter-btn.${character}`);
+                
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+            }
+            
+            renderEvents();
+            drawConnections();
+            
+            // Update stats to show filtered count
+            const visibleEvents = document.querySelectorAll('.event').length;
+            const filterInfo = document.getElementById('filter-info');
+            if (filterInfo) {
+                if (character === 'all') {
+                    filterInfo.textContent = `Showing all ${events.length} events`;
+                } else {
+                    const charName = character.charAt(0).toUpperCase() + character.slice(1);
+                    const totalForChar = events.filter(e => e.characters.includes(character)).length;
+                    filterInfo.textContent = `Showing ${totalForChar} events for ${charName}`;
+                }
+            }
+        }
+        
+        // Initialize on load
+        window.addEventListener('load', () => {
+            initializeTimeline();
+            
+            // Hide scroll indicators when user scrolls
+            const container = document.querySelector('.timeline-container');
+            const indicators = document.querySelectorAll('.scroll-indicator');
+            
+            container.addEventListener('scroll', () => {
+                // Fade horizontal indicator
+                if (container.scrollLeft > 50) {
+                    indicators[0].style.opacity = '0';
+                } else {
+                    indicators[0].style.opacity = '1';
+                }
+                
+                // Fade vertical indicator
+                if (container.scrollTop > 50) {
+                    indicators[1].style.opacity = '0';
+                } else {
+                    indicators[1].style.opacity = '1';
+                }
+            });
+            
+            // Add fun interactions to stats
+            const joeyCard = Array.from(document.querySelectorAll('.stat-card')).find(card => 
+                card.textContent.includes("Joey's Sandwiches")
+            );
+            if (joeyCard) {
+                joeyCard.addEventListener('click', () => {
+                    const number = joeyCard.querySelector('.stat-number');
+                    number.style.transform = 'scale(1.5)';
+                    setTimeout(() => {
+                        number.style.transform = 'scale(1)';
+                    }, 300);
+                });
+            }
+            
+            // Animate Janice's OH MY GOD
+            const janiceCard = Array.from(document.querySelectorAll('.stat-card')).find(card => 
+                card.textContent.includes("MY GOD")
+            );
+            if (janiceCard) {
+                janiceCard.addEventListener('mouseenter', () => {
+                    const number = janiceCard.querySelector('.stat-number');
+                    number.textContent = 'MY GOD!';
+                    setTimeout(() => {
+                        number.textContent = 'OH!';
+                    }, 500);
+                });
+            }
+        });
+        window.addEventListener('resize', drawConnections);
+    </script>
+</body>
+</html>
